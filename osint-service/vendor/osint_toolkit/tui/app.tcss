@@ -1,0 +1,371 @@
+/* Personal OSINT Toolkit — dark theme layout. Colours come from the "osint-dark" theme. */
+
+Screen {
+    background: $background;
+}
+
+.section-title {
+    color: $text-muted;
+    text-style: bold;
+    margin: 1 0 0 0;
+}
+
+/* ------------------------------------------------------------------ home */
+#home {
+    height: 1fr;
+}
+
+#sidebar {
+    width: 30;
+    background: $surface;
+    border-right: tall $panel;
+    padding: 0 1;
+}
+
+#menu {
+    height: 1fr;
+    background: $surface;
+    border: none;
+}
+
+#main {
+    padding: 1 3;
+    height: 1fr;
+}
+
+#hero {
+    text-style: bold;
+    color: $primary;
+    content-align-horizontal: left;
+    height: auto;
+}
+
+#hero-hint {
+    color: $text-muted;
+    margin-bottom: 1;
+}
+
+#query-row {
+    height: 3;
+}
+
+#type-badge {
+    width: auto;
+    min-width: 8;
+    height: 3;
+    padding: 1 2;
+    background: $panel;
+    color: $text-muted;
+    text-style: bold;
+}
+
+#type-badge.forced {
+    background: $primary 30%;
+    color: $primary;
+}
+
+#query {
+    width: 1fr;
+    border: tall $primary 40%;
+}
+
+#query:focus {
+    border: tall $primary;
+}
+
+#detect-error {
+    color: $error;
+    height: auto;
+}
+
+#candidates {
+    height: auto;
+    max-height: 9;
+    background: $surface;
+    border: round $panel;
+}
+
+#plan-preview {
+    height: auto;
+    margin: 1 0;
+}
+
+#options {
+    height: 3;
+    margin-bottom: 1;
+}
+
+.switch-label {
+    padding: 1 3 0 1;
+}
+
+#actions Button {
+    margin-right: 2;
+}
+
+/* ------------------------------------------------------------------ run */
+#run {
+    padding: 1 2;
+}
+
+#run-title {
+    height: auto;
+    margin-bottom: 1;
+}
+
+#run-stats {
+    height: 1;
+    margin-bottom: 1;
+}
+
+#progress {
+    width: 1fr;
+}
+
+#elapsed {
+    width: 12;
+    content-align-horizontal: right;
+    color: $text-muted;
+}
+
+#run-table {
+    height: 1fr;
+    min-height: 6;
+}
+
+#run-log {
+    height: 9;
+    border: round $panel;
+    background: $surface;
+    margin-top: 1;
+}
+
+#run-actions {
+    height: auto;
+    margin-top: 1;
+}
+
+#run-actions Button {
+    margin-right: 2;
+}
+
+/* ------------------------------------------------------------------ results */
+#results {
+    padding: 0 2;
+}
+
+#summary {
+    height: auto;
+    padding: 1 0 0 0;
+}
+
+#cards {
+    height: 5;
+    margin: 1 0;
+}
+
+.card {
+    width: 1fr;
+    height: 4;
+    margin-right: 1;
+    padding: 0 2;
+    background: $surface;
+    border: round $panel;
+    content-align: left middle;
+}
+
+#filter {
+    margin-bottom: 1;
+}
+
+#tabs {
+    height: 1fr;
+}
+
+.pane-help {
+    height: auto;
+    margin: 0 0 1 0;
+}
+
+TabPane DataTable {
+    height: 1fr;
+}
+
+/* ------------------------------------------------------------------ lists */
+#history, #modules-screen {
+    padding: 1 2;
+}
+
+#history-title {
+    height: auto;
+    margin-bottom: 1;
+}
+
+#history-table, #modules-table {
+    height: 1fr;
+}
+
+#settings {
+    padding: 0 2 1 2;
+}
+
+#settings DataTable {
+    height: auto;
+    max-height: 22;
+}
+
+.button-row {
+    height: auto;
+    margin: 1 0;
+}
+
+.button-row Button {
+    margin-right: 2;
+}
+
+#dbip-loading {
+    width: 8;
+    height: 3;
+}
+
+/* ------------------------------------------------------------------ dialogs */
+ModalScreen {
+    align: center middle;
+    background: $background 70%;
+}
+
+.dialog {
+    width: 72;
+    max-width: 95%;
+    height: auto;
+    max-height: 90%;
+    padding: 1 2;
+    background: $surface;
+    border: thick $primary 60%;
+}
+
+.dialog.wide {
+    width: 120;
+}
+
+.dialog-title {
+    text-style: bold;
+    color: $primary;
+    margin-bottom: 1;
+}
+
+.dialog-body {
+    color: $text-muted;
+    margin-bottom: 1;
+    height: auto;
+}
+
+.dialog-scroll {
+    height: auto;
+    max-height: 30;
+}
+
+.dialog-buttons {
+    height: auto;
+    margin-top: 1;
+    align-horizontal: right;
+}
+
+.dialog-buttons Button {
+    margin-left: 2;
+}
+
+#consent-table {
+    height: auto;
+    max-height: 18;
+    margin-bottom: 1;
+}
+
+#consent {
+    border: thick $warning 70%;
+}
+
+SelectionList {
+    height: auto;
+    max-height: 20;
+}
+
+/* ------------------------------------------------------------------ dossier & filters */
+#dossier {
+    height: 1fr;
+}
+
+.dossier-table {
+    height: auto;
+    max-height: 14;
+}
+
+.dossier-empty {
+    height: auto;
+    padding: 0 0 0 2;
+}
+
+.seen-filter {
+    height: 3;
+    margin-bottom: 1;
+}
+
+.seen-filter-label {
+    padding: 1 1 0 0;
+    color: $text-muted;
+}
+
+.seen-filter Select {
+    width: 44;
+}
+
+/* ------------------------------------------------------------------ live module progress */
+#module-progress {
+    height: auto;
+    margin-bottom: 1;
+}
+
+.mod-progress {
+    height: 1;
+}
+
+.mod-progress Label {
+    width: 1fr;
+    color: $text;
+}
+
+.mod-progress ProgressBar {
+    width: 50;
+}
+
+/* ------------------------------------------------------------------ limits (F4) */
+.limit-row {
+    height: 3;
+}
+
+.limit-label {
+    width: 36;
+    padding: 1 1 0 0;
+}
+
+.limit-input {
+    width: 14;
+}
+
+.limit-hint {
+    padding: 1 0 0 2;
+    color: $text-muted;
+}
+
+#result-actions {
+    height: auto;
+    margin-bottom: 1;
+}
+
+#result-actions Button {
+    margin-right: 2;
+}
+
+#report-status {
+    padding: 1 0 0 1;
+}

@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>Отчёт о проверке по открытым источникам — {{ inv.id[:8] }}</title>
+<style>
+  @page {
+    size: A4;
+    margin: 20mm 15mm 20mm 30mm;
+    @top-right { content: "{{ options.classification | upper }}"; font: bold 10pt "Liberation Serif", "Times New Roman", serif; letter-spacing: 1px; }
+    @bottom-center { content: counter(page); font: 12pt "Liberation Serif", "Times New Roman", serif; }
+  }
+  @page :first { @bottom-center { content: none; } @top-right { content: none; } }
+  html { font-family: "Liberation Serif", "Times New Roman", "DejaVu Serif", serif; font-size: 14pt; line-height: 1.5; color: #000; }
+  body { margin: 0; }
+  h1 { font-size: 14pt; text-transform: uppercase; text-align: center; margin: 0 0 12pt; page-break-after: avoid; }
+  h2 { font-size: 14pt; margin: 18pt 0 8pt; page-break-after: avoid; }
+  p { margin: 0 0 6pt; text-align: justify; text-indent: 12.5mm; }
+  p.flat { text-indent: 0; }
+  .title { height: 245mm; display: flex; flex-direction: column; }
+  .title .org { text-align: center; text-transform: uppercase; font-weight: bold; min-height: 20mm; }
+  .title .mark { text-align: right; margin-top: 8mm; line-height: 1.3; }
+  .title .mark b { font-size: 15pt; letter-spacing: 2px; }
+  .title .name { margin-top: 55mm; text-align: center; }
+  .title .name .big { font-size: 18pt; font-weight: bold; text-transform: uppercase; letter-spacing: 1px; }
+  .title .object { margin-top: 18mm; text-align: center; }
+  .title .object .value { font-weight: bold; word-break: break-all; }
+  .title .meta { margin-top: auto; line-height: 1.4; font-size: 12pt; }
+  .title .meta td { padding: 1pt 6pt 1pt 0; vertical-align: top; }
+  .title .footer { text-align: center; margin-top: 10mm; font-size: 12pt; }
+  .newpage { page-break-before: always; }
+  table { width: 100%; table-layout: fixed; border-collapse: collapse; font-size: 10pt; line-height: 1.25; margin: 4pt 0 10pt; }
+  th, td { border: 0.6pt solid #000; padding: 2.5pt 4pt; vertical-align: top; text-align: left; }
+  th { background: #e8e8e8; font-weight: bold; }
+  thead { display: table-header-group; }
+  tr { page-break-inside: avoid; }
+  td.n { width: 7mm; text-align: center; }
+  td.url, .url { word-break: break-all; font-size: 9pt; }
+  td.frag { font-size: 9.5pt; hyphens: auto; }
+  td.st { font-size: 9pt; hyphens: auto; }
+  .ok { font-weight: bold; }
+  .muted { color: #444; }
+  .kpi td { font-size: 12pt; }
+  .kpi { table-layout: auto; }
+  .kpi td.v { text-align: center; width: 30mm; font-weight: bold; }
+  .notice { border: 1pt solid #000; padding: 6pt 8pt; font-size: 11pt; line-height: 1.35; margin: 8pt 0; }
+  ol.sources { font-size: 11pt; line-height: 1.35; padding-left: 9mm; }
+  ol.sources li { margin-bottom: 3pt; }
+  ul.compact { font-size: 11pt; line-height: 1.35; margin: 0; }
+  a { color: #000; text-decoration: none; }
+</style>
+</head>
+<body>
+
+<section class="title">
+  <div class="org">{{ options.organization }}</div>
+  <div class="mark"><b>{{ options.classification | upper }}</b><br>Экз. № 1</div>
+  <div class="name">
+    <div class="big">Отчёт</div>
+    <div>о проверке по открытым источникам (OSINT)</div>
+  </div>
+  <div class="object">
+    Объект исследования:<br>
+    <span class="value">{{ inv.target.type.label }}: {{ inv.target.normalized }}</span>
+    {% if inv.related_targets %}<br><span class="muted">Связанные: {{ inv.related_targets | map(attribute="normalized") | join(", ") }}</span>{% endif %}
+  </div>
+  <div class="meta">
+    <table style="width:auto; table-layout: auto; font-size: 12pt; border: 0;">
+      <tr><td style="border:0">Идентификатор исследования:</td><td style="border:0">{{ inv.id }}</td></tr>
+      <tr><td style="border:0">Проведено:</td><td style="border:0">{{ inv.created_at.astimezone().strftime("%d.%m.%Y %H:%M") }}{% if inv.finished_at %} — {{ inv.finished_at.astimezone().strftime("%H:%M") }}{% endif %}</td></tr>
+      <tr><td style="border:0">Режим:</td><td style="border:0">{{ view.mode_text }}, {{ view.status_text }}</td></tr>
+      {% if options.author %}<tr><td style="border:0">Исполнитель:</td><td style="border:0">{{ options.author }}</td></tr>{% endif %}
+      <tr><td style="border:0">Средство:</td><td style="border:0">osint-toolkit {{ view.app_version }}</td></tr>
+    </table>
+  </div>
+  <div class="footer">{{ today }}</div>
+</section>
+
+<section class="newpage">
+  <h1>Краткое резюме</h1>
+  <h2>1 Результаты проверки</h2>
+  <p>Проверка выполнена по открытым источникам {{ inv.created_at.astimezone().strftime("%d.%m.%Y") }}.
+    Задействовано модулей: {{ summary.modules_total }}, из них вернули сведения: {{ summary.modules_with_data }}.
+    Найдено страниц и документов с упоминанием объекта: {{ summary.pages }}, из них наличие идентификатора
+    подтверждено загрузкой страницы: {{ summary.confirmed }}.</p>
+  <table class="kpi">
+    <tr><td>Страниц и документов, где замечен идентификатор</td><td class="v">{{ summary.pages }}</td></tr>
+    <tr><td>— из них подтверждено на странице</td><td class="v">{{ summary.confirmed }}</td></tr>
+    <tr><td>Документов (подтверждено)</td><td class="v">{{ summary.documents }} ({{ summary.documents_confirmed }})</td></tr>
+    <tr><td>Страниц социальных сетей (подтверждено)</td><td class="v">{{ summary.social }} ({{ summary.social_confirmed }})</td></tr>
+    <tr><td>Прочих сведений: подтверждено / вероятно / не проверено</td><td class="v">{{ summary.confirmed_findings }} / {{ summary.likely }} / {{ summary.unverified }}</td></tr>
+    <tr><td>Использованных источников</td><td class="v">{{ sources | length }}</td></tr>
+  </table>
+  {% if view.banner %}<div class="notice"><b>Внимание.</b> {{ view.banner }}</div>{% endif %}
+  {% if summary.platforms %}
+  <p>Идентификатор подтверждён на площадках: {{ summary.platforms | join(", ") }}.</p>
+  {% endif %}
+  {% if summary.top %}
+  <p class="flat"><b>Основные подтверждённые упоминания:</b></p>
+  <ul class="compact">
+    {% for r in summary.top %}<li>{{ r.platform }} — {{ r.title | short(90) }} <span class="url">({{ r.url | short(110) }})</span></li>{% endfor %}
+  </ul>
+  {% endif %}
+  <div class="notice">{{ view.disclaimer }}</div>
+</section>
+
+{% set ns = namespace(section=1) %}
+{% for title, rows in [("Где замечен идентификатор", view.seen), ("Документы", view.seen_documents), ("Социальные сети", view.seen_social)] %}
+{% if rows %}
+{% set ns.section = ns.section + 1 %}
+<section>
+  <h2>{{ ns.section }} {{ title }}</h2>
+  <p class="flat muted" style="font-size:11pt">«Подтверждено на странице» — идентификатор найден в тексте, загруженном программой; иные статусы означают, что упоминание известно только со слов поисковой системы или внешнего инструмента.</p>
+  <table>
+    <colgroup><col style="width:8mm"><col style="width:22mm"><col style="width:24mm"><col style="width:43mm"><col style="width:44mm"><col style="width:24mm"></colgroup>
+    <thead><tr><th>№</th><th>Тип</th><th>Ресурс</th><th>Адрес</th><th>Фрагмент</th><th>Проверка</th></tr></thead>
+    <tbody>
+    {% for r in rows %}
+      <tr>
+        <td class="n">{{ loop.index }}</td>
+        <td>{{ seen_label(r) }}</td>
+        <td>{{ r.platform | short(60) }}</td>
+        <td class="url">{% if r.url is web_url %}<a href="{{ r.url }}">{{ r.url | short(160) }}</a>{% else %}{{ r.url | short(160) }}{% endif %}</td>
+        <td class="frag">{{ r.fragment | short(max_fragment) }}</td>
+        <td class="st{% if r.confirmed %} ok{% endif %}">{{ r.status_label }}</td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</section>
+{% endif %}
+{% endfor %}
+
+{% if view.sections %}
+{% set ns.section = ns.section + 1 %}
+<section>
+  <h2>{{ ns.section }} Прочие сведения</h2>
+  {% for section in view.sections %}
+  <p class="flat"><b>{{ ns.section }}.{{ loop.index }} {{ section.title }}</b> — {{ section.help }}</p>
+  <table>
+    <colgroup><col style="width:8mm"><col style="width:40mm"><col style="width:77mm"><col style="width:40mm"></colgroup>
+    <thead><tr><th>№</th><th>Атрибут</th><th>Значение</th><th>Источник</th></tr></thead>
+    <tbody>
+    {% for row in section.rows %}
+      <tr>
+        <td class="n">{{ loop.index }}</td>
+        <td>{{ row.finding.attribute }}</td>
+        <td class="frag">{{ row.finding.value | fmt_value }}</td>
+        <td class="url">{{ row.finding.source_name | short(80) }}</td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  {% endfor %}
+</section>
+{% endif %}
+
+{% set ns.section = ns.section + 1 %}
+<section>
+  <h2>{{ ns.section }} Ограничения и оговорки</h2>
+  <p>Сведения получены из общедоступных источников на дату проверки и могут быть неполными или устаревшими. Совпадение идентификатора не устанавливает личность: упоминание может относиться к другому лицу. Результаты поисковых систем, условия которых запрещают хранение выдачи, в отчёт не включены.</p>
+  {% if view.limitations or view.errors or view.warnings %}
+  <ul class="compact">
+    {% for w in view.warnings %}<li>{{ w }}</li>{% endfor %}
+    {% for module, text in view.errors %}<li>[{{ module }}] ошибка: {{ text | short(300) }}</li>{% endfor %}
+    {% for module, text in view.limitations %}<li>[{{ module }}] {{ text | short(300) }}</li>{% endfor %}
+  </ul>
+  {% endif %}
+</section>
+
+{% if sources %}
+{% set ns.section = ns.section + 1 %}
+<section class="newpage">
+  <h1>Список использованных источников</h1>
+  <ol class="sources">
+    {% for s in sources %}
+    <li>{{ s.title | short(200) }} : [электронный ресурс]. — URL: <span class="url">{{ s.url }}</span> (дата обращения: {{ s.accessed }}).</li>
+    {% endfor %}
+  </ol>
+</section>
+{% endif %}
+
+<section class="newpage">
+  <h1>Приложение А</h1>
+  <p class="flat" style="text-align:center"><b>Состав и результаты проверочных модулей</b></p>
+  <table>
+    <colgroup><col style="width:8mm"><col style="width:62mm"><col style="width:33mm"><col style="width:26mm"><col style="width:18mm"><col style="width:18mm"></colgroup>
+    <thead><tr><th>№</th><th>Модуль</th><th>Цель</th><th>Статус</th><th>Сведений</th><th>Время</th></tr></thead>
+    <tbody>
+    {% for m in view.modules %}
+      <tr><td class="n">{{ loop.index }}</td><td>{{ m.title }}<br><span class="muted">{{ m.module }}</span></td><td class="url">{{ m.target | short(60) }}</td><td>{{ m.status.label }}</td><td style="text-align:center">{{ m.findings }}</td><td>{{ m.duration }}</td></tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</section>
+
+</body>
+</html>

@@ -1,0 +1,2 @@
+# Maigret ставится в отдельное окружение services/osint/.venv-maigret (много зависимостей).
+maigret==0.6.6

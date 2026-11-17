@@ -1,0 +1,195 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; img-src data:; base-uri 'none'; form-action 'none'">
+<meta name="referrer" content="no-referrer">
+<meta name="robots" content="noindex, nofollow">
+<title>{{ view.title }}</title>
+<style>
+:root {
+  --bg: #f6f7f9; --panel: #ffffff; --text: #1d2330; --muted: #5c667a; --line: #dfe3ea;
+  --accent: #2f6fdb; --ok: #1f8a4c; --warn: #b7791f; --bad: #c53030; --info: #2b8a9e;
+  --violet: #8a3fb8; --code: #eef1f6;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #0d1117; --panel: #151b24; --text: #e3e8f0; --muted: #8b96a8; --line: #273041;
+    --accent: #6ea8fe; --ok: #4cc38a; --warn: #e3b341; --bad: #f47067; --info: #56c2d6;
+    --violet: #c69cf4; --code: #1d2533;
+  }
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--text);
+  font: 15px/1.55 system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans", sans-serif; }
+main { max-width: 1180px; margin: 0 auto; padding: 32px 16px 64px; }
+h1 { font-size: 1.6rem; margin: 0 0 4px; }
+h2 { font-size: 1.15rem; margin: 36px 0 10px; display: flex; align-items: center; gap: 10px; }
+.sub { color: var(--muted); margin: 0 0 20px; }
+.panel { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 16px 20px; }
+.meta { display: grid; grid-template-columns: max-content 1fr; gap: 6px 18px; }
+.meta dt { color: var(--muted); }
+.meta dd { margin: 0; overflow-wrap: anywhere; }
+.notice { border-left: 4px solid var(--warn); margin-top: 16px; color: var(--muted); }
+.cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin-top: 16px; }
+.card { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 12px 16px; }
+.card b { display: block; font-size: 1.5rem; }
+.card span { color: var(--muted); font-size: .85rem; }
+.table-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 12px; background: var(--panel); }
+table { width: 100%; border-collapse: collapse; }
+th, td { text-align: left; vertical-align: top; padding: 9px 12px; border-bottom: 1px solid var(--line); }
+th { font-size: .78rem; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); background: var(--code); }
+tr:last-child td { border-bottom: 0; }
+td.value { white-space: pre-wrap; overflow-wrap: anywhere; max-width: 360px; }
+td.ev { color: var(--muted); max-width: 320px; }
+code { background: var(--code); border-radius: 4px; padding: 1px 5px; font-size: .85em; overflow-wrap: anywhere; }
+a { color: var(--accent); overflow-wrap: anywhere; }
+.small { font-size: .82rem; color: var(--muted); }
+.badge { display: inline-block; padding: 1px 9px; border-radius: 999px; font-size: .78rem; font-weight: 600;
+  border: 1px solid currentColor; white-space: nowrap; }
+.s-ok, .c-confirmed { color: var(--ok); }
+.s-no_results { color: var(--muted); }
+.s-not_configured, .s-timeout, .c-likely { color: var(--warn); }
+.s-skipped { color: var(--info); }
+.s-error { color: var(--bad); }
+.s-cancelled { color: var(--violet); }
+.c-unverified { color: var(--muted); }
+.contra li { margin-bottom: 8px; }
+.contra { border-left: 4px solid var(--bad); }
+ul { margin: 0; padding-left: 20px; }
+footer { margin-top: 40px; color: var(--muted); font-size: .82rem; }
+@media print { body { background: #fff; color: #000; } .panel, .table-wrap, .card { border-color: #bbb; } }
+</style>
+</head>
+<body>
+<main>
+  <h1>{{ view.title }}</h1>
+  <p class="sub">Сформировано {{ view.generated_at | fmt_time }} · osint-toolkit {{ view.app_version }}</p>
+
+  <section class="panel">
+    <dl class="meta">
+      <dt>Запрос</dt><dd>{{ inv.query }}</dd>
+      <dt>Цель</dt><dd>{{ inv.target.type.label }}: <code>{{ inv.target.normalized }}</code></dd>
+      {% if inv.related_targets %}
+      <dt>Связанные</dt><dd>{% for t in inv.related_targets %}{{ t.type.label }}: <code>{{ t.normalized }}</code>{% if not loop.last %}, {% endif %}{% endfor %}</dd>
+      {% endif %}
+      <dt>Режим</dt><dd>{{ view.mode_text }}</dd>
+      <dt>Начато</dt><dd>{{ inv.created_at | fmt_time }}</dd>
+      <dt>Завершено</dt><dd>{{ inv.finished_at | fmt_time }}</dd>
+      <dt>Статус</dt><dd>{{ view.status_text }}</dd>
+      <dt>ID</dt><dd><code>{{ inv.id }}</code></dd>
+    </dl>
+  </section>
+  <p class="panel notice">{{ view.disclaimer }}</p>
+  {% if view.banner %}<p class="panel notice"><strong>⚠ {{ view.banner }}</strong></p>{% endif %}
+
+  <div class="cards">
+    <div class="card"><b>{{ view.modules | length }}</b><span>модулей</span></div>
+    {% for section in view.sections %}
+    <div class="card"><b class="c-{{ section.confidence.value }}">{{ section.rows | length }}</b><span>{{ section.title | lower }}</span></div>
+    {% endfor %}
+    <div class="card"><b{% if view.contradictions %} class="s-error"{% endif %}>{{ view.contradictions | length }}</b><span>противоречий</span></div>
+  </div>
+
+  <h2>Модули</h2>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Модуль</th><th>Цель</th><th>Статус</th><th>Находок</th><th>Время</th><th>Примечание</th></tr></thead>
+    <tbody>
+    {% for m in view.modules %}
+      <tr>
+        <td>{{ m.title }}<br><span class="small">{{ m.module }}</span></td>
+        <td><code>{{ m.target }}</code></td>
+        <td><span class="badge s-{{ m.status.value }}">{{ m.status.label }}</span></td>
+        <td>{{ m.findings }}</td>
+        <td class="small">{{ m.duration }}</td>
+        <td class="small">{{ m.errors | join("; ") }}</td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table></div>
+
+  {% for title, rows in [("Где замечен идентификатор", view.seen), ("Документы", view.seen_documents), ("Соцсети", view.seen_social)] %}{% if rows %}
+  <h2>{{ title }} <span class="small">— {{ rows | length }}; «подтверждено» — идентификатор найден в загруженном тексте страницы</span></h2>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Тип</th><th>Ресурс</th><th>Ссылка</th><th>Фрагмент</th><th>Проверка</th></tr></thead>
+    <tbody>
+    {% for r in rows %}
+      <tr>
+        <td>{{ r.kind_label }}{% if r.doc_type %}<br><span class="small">{{ r.doc_type | upper }} {{ r.location }}</span>{% endif %}</td>
+        <td>{{ r.platform }}</td>
+        <td>{% if r.url is web_url %}<a href="{{ r.url }}" rel="noopener noreferrer nofollow" target="_blank" class="small">{{ r.url }}</a>{% else %}<span class="small">{{ r.url }}</span>{% endif %}</td>
+        <td class="ev">{{ r.fragment }}</td>
+        <td><span class="badge c-{{ r.confidence.value }}">{{ r.status_label }}</span></td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table></div>
+  {% endif %}{% endfor %}
+
+  {% for section in view.sections %}
+  <h2><span class="badge c-{{ section.confidence.value }}">{{ section.title }}</span> {{ section.rows | length }} <span class="small">— {{ section.help }}</span></h2>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Объект</th><th>Атрибут</th><th>Значение</th><th>Источник</th><th>Что подтверждает</th><th>Время (UTC)</th></tr></thead>
+    <tbody>
+    {% for row in section.rows %}
+      {% set f = row.finding %}
+      <tr>
+        <td><code>{{ f.subject }}</code></td>
+        <td><code>{{ f.attribute }}</code></td>
+        <td class="value">{{ row.value_text }}{% for link in row.links %}<br><a href="{{ link }}" rel="noopener noreferrer nofollow" target="_blank">ссылка для ручной проверки</a>{% endfor %}</td>
+        <td>{{ f.source_name }}<br>
+          {% if row.source_is_web %}<a href="{{ f.source_url }}" rel="noopener noreferrer nofollow" target="_blank" class="small">{{ f.source_url }}</a>
+          {% else %}<span class="small">{{ f.source_url }}</span>{% endif %}</td>
+        <td class="ev">{{ f.evidence }}</td>
+        <td class="small">{{ f.observed_at.strftime("%Y-%m-%d %H:%M:%S") }}</td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table></div>
+  {% else %}
+  <h2>Находки</h2><p class="panel">Находок нет.</p>
+  {% endfor %}
+
+  {% if view.helpers %}
+  <h2>Дорки <span class="small">— не находки: выполненные — с числом результатов; ссылки открываются только по вашему клику</span></h2>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Группа</th><th>Запрос</th><th>Результатов</th><th>Открыть</th></tr></thead>
+    <tbody>
+    {% for row in view.helpers %}
+      {% set v = row.finding.value %}
+      {% if v is mapping and v.query is defined %}
+      <tr>
+        <td>{{ v.group }}</td>
+        <td><code>{{ v.query }}</code></td>
+        <td>{{ v.hits if v.hits is defined else "—" }}</td>
+        <td>{% for engine in ["google", "yandex", "bing"] %}{% if v[engine] is defined and v[engine] is web_url %}<a href="{{ v[engine] }}" rel="noopener noreferrer nofollow" target="_blank">{{ engine | capitalize }}</a> {% endif %}{% endfor %}</td>
+      </tr>
+      {% else %}
+      <tr><td>Варианты записи</td><td colspan="3" class="value">{{ row.value_text }}</td></tr>
+      {% endif %}
+    {% endfor %}
+    </tbody>
+  </table></div>
+  {% endif %}
+
+  {% if view.contradictions %}
+  <h2>Противоречия между источниками</h2>
+  <div class="panel contra"><ul>
+    {% for c in view.contradictions %}<li>{{ c.description }}</li>{% endfor %}
+  </ul></div>
+  {% endif %}
+
+  {% if view.warnings or view.errors or view.limitations %}
+  <h2>Ошибки и ограничения</h2>
+  <div class="panel"><ul>
+    {% for w in view.warnings %}<li class="s-error">{{ w }}</li>{% endfor %}
+    {% for module, error in view.errors %}<li><span class="s-error">⚠</span> <code>{{ module }}</code> {{ error }}</li>{% endfor %}
+    {% for module, text in view.limitations %}<li><code>{{ module }}</code> {{ text }}</li>{% endfor %}
+  </ul></div>
+  {% endif %}
+
+  <footer>Локальный отчёт. Файл не загружает внешних ресурсов; ссылки открываются только по вашему клику.</footer>
+</main>
+</body>
+</html>
